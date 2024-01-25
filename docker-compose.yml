@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+  api:
+    container_name: apis
+    build: .
+    command: gunicorn app.core.server:app --workers 5 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    volumes:
+      - ./server:/url_crawler
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    env_file:
+      - server/.env
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_HOSTNAME=URL_CRAWLER_DB
+      - REDIS_HOST=URL_CRAWLER_REDIS
+      - ENVIRONMENT=development
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+    depends_on:
+      - db
+      - redis
+    links:
+      - 'db:URL_CRAWLER_DB'
+      - 'redis:URL_CRAWLER_REDIS'
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: url_crawler
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "8080:5432"
+    env_file:
+      - server/.env
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    links:
+      - "db:pgsql-server"
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+#    ports:
+#      - "6379:6379"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
