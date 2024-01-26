@@ -11,77 +11,62 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import Url
 from app.core.connection.database import async_session
-from app.common.image_url import image_url
-from app.common.empty import empty
+from app.common.empty import Empty
+
+
+class ImageMixin:
+    def _image_response__store_in_disk(
+        self,
+        icon: Response | Empty,
+    ) -> dict[str, str] | None:
+        """
+        create image instance in memory
+        store it in file and return file path
+        """
+        image = Image.open(BytesIO(icon.content)).convert("RGBA")
+        ts = time.time()
+        filename = (
+            "".join(
+                random.choice(string.ascii_uppercase + string.digits) for _ in range(10)
+            )
+            + "_"
+            + str(ts)
+            + ".png"
+        )
+        directory = f"storage/"
+        os.makedirs(directory, exist_ok=True)
+        file_path = os.path.join(directory, filename)
+        image.save(file_path, format="png")
+        print("\n\n" + "111" * 50)
+        print(file_path)
+        print("\n\n")
+        return file_path
 
 
 class StoreMixin:
     async def _save_in_db(
         self,
-        url: dict[str, str],
+        url_pars: dict[str, str],
         title: str,
         file_path: str,
-        db: AsyncSession | None,
     ):
+        """
+        save url in database
+        """
         url_obj = Url(
-            domain=url["domain"],
-            path=url["path"],
-            query_string=url["query_string"],
-            fragment=url["fragment"],
-            title=str(title),
-            icon=str(file_path),
+            domain=url_pars["domain"],
+            path=url_pars["path"],
+            query_string=url_pars["query_string"],
+            fragment=url_pars["fragment"],
+            title=title,
+            icon=file_path,
         )
-        if db is None:
+        if not hasattr(self, "_db") or (hasattr(self, "_db") and self._db is None):
             async with async_session() as session:
                 session.add(url_obj)
                 await session.commit()
         else:
-            db.add(url_obj)
-            await db.commit()
+            self._db.add(url_obj)
+            await self._db.commit()
+
         return url_obj.id
-
-    async def store(
-        self,
-        url: dict[str, str],
-        title: str | empty,
-        icon: Response | empty,
-        db: AsyncSession | None = None,
-    ) -> dict[str, str] | None:
-        print("\n\n")
-        print(f"title = {title}")
-        print(f"icon = {icon}")
-        image = (
-            Image.open(BytesIO(icon.content)).convert("RGBA")
-            if not icon is empty
-            else empty
-        )
-        filename = "".join(
-            random.choice(string.ascii_uppercase + string.digits) for _ in range(10)
-        )
-        ts = time.time()
-        directory = f"storage/"
-        os.makedirs(directory, exist_ok=True)
-        file_path = os.path.join(
-            directory,
-            filename + "_" + str(ts) + ".png",
-        )
-
-        print(f"image = {image}")
-        print("\n\n")
-        if not image is empty:
-            image.save(file_path, format="png")
-        else:
-            file_path = None
-
-        url_id = await self._save_in_db(
-            url,
-            title,
-            file_path,
-            db,
-        )
-
-        return {
-            "id": url_id,
-            "title": str(title),
-            "icon": image_url(file_path),
-        }

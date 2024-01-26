@@ -1,4 +1,4 @@
-class empty:
+class Empty:
     def __str__(self) -> str:
         return ""
 

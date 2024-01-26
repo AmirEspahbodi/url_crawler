@@ -1,4 +1,8 @@
-from .fetch_url import CrawleMixin
-from .store import StoreMixin
+from .store import ImageMixin, StoreMixin
+from .url_mixin import UrlMixin
 
-__all__ = ["CrawleMixin", "StoreMixin"]
+__all__ = [
+    "ImageMixin",
+    "UrlMixin",
+    "StoreMixin",
+]

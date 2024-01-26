@@ -12,7 +12,11 @@ class UrlCrawlABS(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    async def crawler(self, url: str) -> str:
+    async def _crawl(self, url: str) -> str:
+        ...
+
+    @abstractmethod
+    async def get_info(self, url: str) -> str:
         ...
 
     @abstractmethod

@@ -1,5 +1,6 @@
+from datetime import datetime
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy import String, Index, INTEGER
+from sqlalchemy import String, Index, INTEGER, TIMESTAMP
 from sqlalchemy.dialects.postgresql import BIGINT, TEXT
 from sqlalchemy.schema import UniqueConstraint
 
@@ -48,6 +49,12 @@ class Url(Base, TimestampMixin):
         INTEGER,
         nullable=False,
         default=1,
+    )
+
+    valid_until: Mapped[datetime] = mapped_column(
+        TIMESTAMP,
+        nullable=True,
+        default=None,
     )
 
     users: Mapped[list["User"]] = relationship(
