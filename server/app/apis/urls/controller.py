@@ -3,6 +3,7 @@ from app.common.crawler import UrlCrawl
 from app.core.exception import NotFoundException
 from app.common.actions import check_url_exits
 from app.common.exeptions import HttpxConnectionException
+from app.core.config import AppConfig
 
 
 class UrlCrawlerController:
@@ -15,6 +16,11 @@ class UrlCrawlerController:
             raise HTTPException(
                 detail="page not responding",
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        if crawl_result["icon_path"]:
+            crawl_result["icon_path"] = (
+                AppConfig.BASE_URL + "/" + crawl_result["icon_path"].replace("\\", "/")
             )
         return crawl_result
 

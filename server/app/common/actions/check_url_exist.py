@@ -20,7 +20,6 @@ async def check_url_exits(
         .where(or_(Url.valid_until >= datetime.now(), Url.valid_until == None))
         .where(Url.is_deleted == False)
     )
-    result = None
     if db is None:
         async with async_session() as session:
             result = (await session.execute(stmt)).scalars().first()

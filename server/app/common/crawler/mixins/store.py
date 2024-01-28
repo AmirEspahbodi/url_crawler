@@ -23,6 +23,7 @@ class ImageMixin:
         create image instance in memory
         store it in file and return file path
         """
+        print(icon.content)
         image = Image.open(BytesIO(icon.content)).convert("RGBA")
         ts = time.time()
         filename = (

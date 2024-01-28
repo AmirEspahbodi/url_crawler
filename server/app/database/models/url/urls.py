@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String, Index, INTEGER, TIMESTAMP
-from sqlalchemy.dialects.postgresql import BIGINT, TEXT
+from sqlalchemy.dialects.postgresql import BIGINT, TEXT, SMALLINT
 from sqlalchemy.schema import UniqueConstraint
 
 from app.core.connection.database import Base
@@ -37,7 +37,7 @@ class Url(Base, TimestampMixin):
     )
 
     title: Mapped[str] = mapped_column(
-        String(64),
+        String(255),
         nullable=False,
     )
     icon: Mapped[str] = mapped_column(
@@ -46,7 +46,7 @@ class Url(Base, TimestampMixin):
     )
 
     crawl_times: Mapped[int] = mapped_column(
-        INTEGER,
+        SMALLINT,
         nullable=False,
         default=1,
     )

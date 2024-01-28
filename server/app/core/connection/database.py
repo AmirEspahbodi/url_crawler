@@ -20,9 +20,11 @@ engine = create_async_engine(
 
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
+
 async def connection():
     async with async_session() as session:
         yield session
+
 
 class Base(AsyncAttrs, DeclarativeBase):
     pass

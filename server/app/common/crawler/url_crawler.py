@@ -39,7 +39,7 @@ class UrlCrawl(UrlCrawlABS, ImageMixin, UrlMixin, StoreMixin):
             return Empty
         if title_tag.contents is None:
             return Empty
-        return title_tag.contents
+        return title_tag.contents[0]
 
     async def _icon(self, soup: BeautifulSoup) -> Response:
         """
@@ -53,8 +53,9 @@ class UrlCrawl(UrlCrawlABS, ImageMixin, UrlMixin, StoreMixin):
             icon_link = f"{self._url}{icon_link}"
         print(icon_link)
         icon = await self.get_url(icon_link, raise_exception=False)
-        if icon is None:
+        if icon is None or not icon.content:
             return Empty
+        return icon
 
     async def _crawl(self) -> str:
         """
@@ -82,7 +83,7 @@ class UrlCrawl(UrlCrawlABS, ImageMixin, UrlMixin, StoreMixin):
 
         return {
             "title": str(title),
-            "icon_path": icon_path if not Empty else "",
+            "icon_path": icon_path if not icon_path is Empty else "",
         }
 
     async def get_info(self) -> dict[str, str]:
@@ -127,8 +128,9 @@ class UrlCrawl(UrlCrawlABS, ImageMixin, UrlMixin, StoreMixin):
             await self._db.commit()
 
 
-# test
-# url_crawler = UrlCrawl("https://www.geeksforgeeks.org/extract-title-from-a-webpage-using-python/")
-# asyncio.run(
-#     url_crawler.get_info()
-# )
+# import asyncio
+
+# url_crawler = UrlCrawl("https://sitekhoob.com/")
+# print("111" * 50)
+# print(asyncio.run(url_crawler.get_info()))
+# print("222" * 50)
